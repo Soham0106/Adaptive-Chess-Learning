@@ -13,7 +13,6 @@ def show():
     import streamlit as st
     import chess
     import chess.engine
-    import pyttsx3
     from PIL import Image, ImageDraw, ImageFont
 
     # Parameters
@@ -242,10 +241,6 @@ def show():
     if "board" not in st.session_state:
         st.session_state.board = chess.Board()
 
-    if "tts_engine" not in st.session_state:
-        st.session_state.tts_engine = pyttsx3.init()
-        st.session_state.speaking_lock = threading.Lock()
-
     if "stockfish" not in st.session_state:
         # Force working directory to script location
         os.chdir(os.path.dirname(__file__))
@@ -288,8 +283,6 @@ def show():
         st.session_state.computer_should_play = False
 
     board = st.session_state.board
-    tts_engine = st.session_state.tts_engine
-    speaking_lock = st.session_state.speaking_lock
     stockfish = st.session_state.stockfish
 
     @st.cache_resource
@@ -705,3 +698,4 @@ def show():
             <small>Enhanced with AI assistance</small>
         </div>
         """, unsafe_allow_html=True)
+
