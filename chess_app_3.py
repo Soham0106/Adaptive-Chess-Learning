@@ -282,8 +282,6 @@ if "computer_should_play" not in st.session_state:
     st.session_state.computer_should_play = False
 
 board = st.session_state.board
-tts_engine = st.session_state.tts_engine
-speaking_lock = st.session_state.speaking_lock
 stockfish = st.session_state.stockfish
 
 @st.cache_resource
@@ -700,5 +698,6 @@ with st.sidebar:
     </div>
 
     """, unsafe_allow_html=True)
+
 
 
