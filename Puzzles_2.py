@@ -14,7 +14,7 @@ def show():
 
     # === CONFIGURATION ===
     STOCKFISH_PATH = './stockfish-linux'
-    PIECE_FOLDER = "assets"
+    PIECE_FOLDER = "./assets"
 
     # === PAGE CONFIGURATION ===
     st.set_page_config(
@@ -660,3 +660,4 @@ def show():
         🎯 Master tactical chess skills through 2-piece battles! Each puzzle challenges your strategic thinking.
     </div>
     """, unsafe_allow_html=True)
+
