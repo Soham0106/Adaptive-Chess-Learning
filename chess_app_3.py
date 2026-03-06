@@ -245,7 +245,7 @@ def show():
         # Force working directory to script location
         os.chdir(os.path.dirname(__file__))
 
-        stockfish_path = "./stockfish-unix"  # Using relative path
+        stockfish_path = "./stockfish-linux"  # Using relative path
 
         if not os.path.exists(stockfish_path):
             st.error(f"Stockfish not found at {os.getcwd()}/{stockfish_path}")
@@ -698,4 +698,5 @@ def show():
             <small>Enhanced with AI assistance</small>
         </div>
         """, unsafe_allow_html=True)
+
 
