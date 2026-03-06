@@ -14,7 +14,8 @@ def show():
 
     # === CONFIGURATION ===
     STOCKFISH_PATH = './stockfish-linux'
-    PIECE_FOLDER = "./assets"
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    PIECE_FOLDER = os.path.join(BASE_DIR, "assets")
 
     # === PAGE CONFIGURATION ===
     st.set_page_config(
@@ -660,4 +661,5 @@ def show():
         🎯 Master tactical chess skills through 2-piece battles! Each puzzle challenges your strategic thinking.
     </div>
     """, unsafe_allow_html=True)
+
 
