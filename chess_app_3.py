@@ -12,7 +12,6 @@ if sys.platform.startswith('win'):
 import streamlit as st
 import chess
 import chess.engine
-import pyttsx3
 from PIL import Image, ImageDraw, ImageFont
 
 # Parameters
@@ -240,10 +239,6 @@ section[data-testid="stSidebar"] * {
 # Initialize session state
 if "board" not in st.session_state:
     st.session_state.board = chess.Board()
-
-if "tts_engine" not in st.session_state:
-    st.session_state.tts_engine = pyttsx3.init()
-    st.session_state.speaking_lock = threading.Lock()
 
 if "stockfish" not in st.session_state:
     # Force working directory to script location
@@ -705,4 +700,5 @@ with st.sidebar:
     </div>
 
     """, unsafe_allow_html=True)
+
 
