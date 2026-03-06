@@ -6,22 +6,23 @@ def show():
     import threading
     import time
     import requests
-    
+
     if sys.platform.startswith('win'):
         asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
-    
+
     import streamlit as st
     import chess
     import chess.engine
+    import pyttsx3
     from PIL import Image, ImageDraw, ImageFont
-    
+
     # Parameters
     STOCKFISH_TIME_LIMIT = 0.1
     COMPUTER_MOVE_DELAY = 0.2
-    
+
     # Page Config
     st.set_page_config(page_title="Adaptive Chess Learning", page_icon="♟", layout="centered")
-    
+
     # Enhanced Theme with improved button styling
     st.markdown("""
     <style>
@@ -31,7 +32,7 @@ def show():
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         color: #026670;
     }
-    
+
     /* Main container styling */
     .block-container {
         padding: 2rem;
@@ -42,31 +43,31 @@ def show():
         backdrop-filter: blur(10px);
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
     }
-    
+
     /* Typography improvements */
     h1, h2, h3 {
         color: #026670;
         text-align: center;
         margin-bottom: 1rem;
     }
-    
+
     h1 {
         font-size: 2.5rem;
         text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
     }
-    
+
     /* Image styling */
     img {
         border-radius: 15px;
         box-shadow: 0 6px 20px rgba(0,0,0,0.15);
         transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
-    
+
     img:hover {
         transform: translateY(-5px);
         box-shadow: 0 10px 30px rgba(0,0,0,0.25);
     }
-    
+
     /* Main button styling */
     .stButton > button {
         background: linear-gradient(45deg, #FCE181, #FEF9C7);
@@ -79,13 +80,13 @@ def show():
         box-shadow: 0 4px 15px rgba(252, 225, 129, 0.4);
         width: 100%;
     }
-    
+
     .stButton > button:hover {
         background: linear-gradient(45deg, #FEF9C7, #FCE181);
         transform: translateY(-2px);
         box-shadow: 0 6px 20px rgba(252, 225, 129, 0.6);
     }
-    
+
     /* Suggestion button styling */
     .suggestion-buttons {
         display: flex;
@@ -93,7 +94,7 @@ def show():
         margin: 10px 0;
         flex-wrap: wrap;
     }
-    
+
     .suggestion-button {
         background: linear-gradient(45deg, #B8F2E6, #9FEDD7);
         color: #026670;
@@ -107,22 +108,22 @@ def show():
         min-width: 80px;
         box-shadow: 0 3px 10px rgba(2, 102, 112, 0.2);
     }
-    
+
     .suggestion-button:hover {
         background: linear-gradient(45deg, #9FEDD7, #B8F2E6);
         transform: translateY(-2px);
         box-shadow: 0 5px 15px rgba(2, 102, 112, 0.3);
     }
-    
+
     /* Sidebar styling */
     section[data-testid="stSidebar"] {
         background: linear-gradient(180deg, #026670 0%, #024950 100%);
     }
-    
+
     section[data-testid="stSidebar"] * {
         color: #00BFA5 !important;
     }
-    
+
     /* Game message styling */
     .game-message {
         background: linear-gradient(135deg, #FCE181, #FEF9C7);
@@ -136,13 +137,13 @@ def show():
         box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         animation: pulse 2s infinite;
     }
-    
+
     @keyframes pulse {
         0% { transform: scale(1); }
         50% { transform: scale(1.02); }
         100% { transform: scale(1); }
     }
-    
+
     /* Turn indicator styling */
     .turn-indicator {
         background: linear-gradient(45deg, #026670, #024950);
@@ -155,7 +156,7 @@ def show():
         margin-bottom: 15px;
         box-shadow: 0 4px 15px rgba(2, 102, 112, 0.3);
     }
-    
+
     /* Move history styling */
     .move-history {
         background: rgba(255, 255, 255, 0.9);
@@ -166,7 +167,7 @@ def show():
         overflow-y: auto;
         box-shadow: 0 3px 10px rgba(0,0,0,0.1);
     }
-    
+
     /* Input styling */
     .stTextInput > div > div > input {
         background: rgba(255, 255, 255, 0.9);
@@ -175,18 +176,18 @@ def show():
         color: #DAA520;
         font-weight: 500;
     }
-    
+
     .stTextInput > div > div > input:focus {
         border-color: #FCE181;
         box-shadow: 0 0 10px rgba(252, 225, 129, 0.5);
         color: #B8860B;
     }
-    
+
     .stTextInput > div > div > input::placeholder {
         color: #DAA520;
         opacity: 0.8;
     }
-    
+
     /* Success/Error message styling */
     .stSuccess {
         background: linear-gradient(45deg, #9FEDD7, #B8F2E6);
@@ -194,28 +195,28 @@ def show():
         border-radius: 10px;
         border: none;
     }
-    
+
     .stError {
         background: linear-gradient(45deg, #FFB3BA, #FFDFBA);
         color: #8B0000;
         border-radius: 10px;
         border: none;
     }
-    
+
     .stInfo {
         background: linear-gradient(45deg, #BFEFFF, #E0F6FF);
         color: #026670;
         border-radius: 10px;
         border: none;
     }
-    
+
     .stWarning {
         background: linear-gradient(45deg, #FFEB9C, #FFF2CC);
         color: #8B4513;
         border-radius: 10px;
         border: none;
     }
-    
+
     /* Developer credit styling */
     .developer-credit {
         text-align: center;
@@ -225,7 +226,7 @@ def show():
         border-radius: 10px;
         backdrop-filter: blur(5px);
     }
-    
+
     /* Statistics styling */
     .game-stats {
         background: rgba(255, 255, 255, 0.8);
@@ -236,21 +237,25 @@ def show():
     }
     </style>
     """, unsafe_allow_html=True)
-    
+
     # Initialize session state
     if "board" not in st.session_state:
         st.session_state.board = chess.Board()
-    
+
+    if "tts_engine" not in st.session_state:
+        st.session_state.tts_engine = pyttsx3.init()
+        st.session_state.speaking_lock = threading.Lock()
+
     if "stockfish" not in st.session_state:
         # Force working directory to script location
         os.chdir(os.path.dirname(__file__))
-    
-        stockfish_path = "./stockfish-linux"  # Using relative path
-    
+
+        stockfish_path = "./stockfish-unix"  # Using relative path
+
         if not os.path.exists(stockfish_path):
             st.error(f"Stockfish not found at {os.getcwd()}/{stockfish_path}")
             st.stop()
-    
+
         try:
             st.session_state.stockfish = chess.engine.SimpleEngine.popen_uci(
                 stockfish_path,
@@ -259,32 +264,34 @@ def show():
         except Exception as e:
             st.error(f"Failed to start Stockfish: {e}")
             st.stop()
-    
+
     if "game_message" not in st.session_state:
         st.session_state.game_message = ""
-    
+
     if "player_white" not in st.session_state:
         st.session_state.player_white = "Human"
-    
+
     if "player_black" not in st.session_state:
         st.session_state.player_black = "Computer"
-    
+
     if "auto_play" not in st.session_state:
         st.session_state.auto_play = True
-    
+
     if "move_history" not in st.session_state:
         st.session_state.move_history = []
-    
+
     if "game_stats" not in st.session_state:
         st.session_state.game_stats = {"moves_played": 0, "captures": 0, "checks": 0}
-    
+
     # ADD THIS: Flag to track when computer should play
     if "computer_should_play" not in st.session_state:
         st.session_state.computer_should_play = False
-    
+
     board = st.session_state.board
+    tts_engine = st.session_state.tts_engine
+    speaking_lock = st.session_state.speaking_lock
     stockfish = st.session_state.stockfish
-    
+
     @st.cache_resource
     def load_piece_images():
         pieces = {}
@@ -299,9 +306,9 @@ def show():
                     st.error(f"Missing piece image: {path}")
                     st.stop()
         return pieces
-    
+
     piece_images = load_piece_images()
-    
+
     def draw_board(board):
         SQUARE_SIZE = 64
         BOARD_SIZE = 8 * SQUARE_SIZE
@@ -369,7 +376,7 @@ def show():
             draw.text((x, y), row_number, fill="white", font=font)
         
         return img
-    
+
     def speak_message_async(message, rate=150):
         def speak_worker(msg):
             with speaking_lock:
@@ -377,11 +384,11 @@ def show():
                 tts_engine.say(msg)
                 tts_engine.runAndWait()
         threading.Thread(target=speak_worker, args=(message,), daemon=True).start()
-    
+
     def get_best_moves(board, count=3):
         """Get the best moves from both Stockfish and Lichess database"""
         moves = []
-            
+        
         # Get Stockfish suggestion
         try:
             stockfish_move = stockfish.play(board, chess.engine.Limit(time=STOCKFISH_TIME_LIMIT))
@@ -403,7 +410,7 @@ def show():
                     moves.append(move_uci)
         except Exception as e:
             pass  # Silently fail for lichess API
-            
+        
         # Ensure we have at least some moves by getting random legal moves if needed
         if len(moves) < count:
             legal_moves = list(board.legal_moves)
@@ -414,7 +421,7 @@ def show():
                         break
         
         return moves[:count]
-    
+
     def check_game_state():
         if board.is_checkmate():
             winner = "Black" if board.turn == chess.WHITE else "White"
@@ -432,7 +439,7 @@ def show():
             st.session_state.game_stats["checks"] += 1
         else:
             st.session_state.game_message = ""
-    
+
     def play_computer_move():
         """Function to handle computer moves"""
         try:
@@ -464,7 +471,7 @@ def show():
             st.error(f"Computer move error: {e}")
             st.session_state.computer_should_play = False
         return False
-    
+
     def play_move(move_uci):
         try:
             move = chess.Move.from_uci(move_uci)
@@ -492,7 +499,7 @@ def show():
                         st.session_state.move_history.append(f"1... {move_san}")
                 
                 st.session_state.game_stats["moves_played"] += 1
-                    
+                
                 st.success(f"✅ Move {move_uci} ({move_san}) played.")
                 speak_message_async(f"Move {move_san} played")
                 check_game_state()
@@ -512,24 +519,24 @@ def show():
             st.error(f"❌ Invalid move input: {e}")
             speak_message_async("Invalid move input.")
             return False
-    
+
     # === MAIN UI ===
     st.title("♟ Adaptive Chess Learning ♟")
-    
+
     # DEBUG: Add debug info
     if st.session_state.get("debug_mode", False):
         st.write(f"Debug: computer_should_play = {st.session_state.computer_should_play}")
         st.write(f"Debug: auto_play = {st.session_state.auto_play}")
         st.write(f"Debug: board.turn = {'BLACK' if board.turn == chess.BLACK else 'WHITE'}")
         st.write(f"Debug: game_over = {board.is_game_over()}")
-    
+
     # FIXED: Check if computer should play at the start of each render
     if st.session_state.computer_should_play and st.session_state.auto_play and board.turn == chess.BLACK and not board.is_game_over():
         st.info("🤖 Computer is thinking...")
         time.sleep(COMPUTER_MOVE_DELAY)
         if play_computer_move():
             st.rerun()
-    
+
     # Game status message
     if st.session_state.game_message:
         st.markdown(f"""
@@ -537,7 +544,7 @@ def show():
         {st.session_state.game_message}
         </div>
         """, unsafe_allow_html=True)
-    
+
     # Turn indicator
     current_turn = "White" if board.turn == chess.WHITE else "Black"
     turn_symbol = "♔" if board.turn == chess.WHITE else "♛"
@@ -546,10 +553,10 @@ def show():
     {turn_symbol} {current_turn} to move
     </div>
     """, unsafe_allow_html=True)
-    
+
     # Chess board
     st.image(draw_board(board))
-    
+
     # Move suggestions (only show for white/human player)
     if board.turn == chess.WHITE and not board.is_game_over():
         st.subheader("💡 Suggested Moves:")
@@ -569,13 +576,13 @@ def show():
                                 st.rerun()
                 except:
                     pass
-    
+
     # Manual move input
     st.subheader("🎯 Enter your move:")
     move_input = st.text_input("Type move (UCI notation, e.g. e2e4):", 
                             key="move_uci_value", 
                             placeholder="Enter your move here...")
-    
+
     col1, col2 = st.columns([2, 1])
     with col1:
         if st.button("🚀 Play Move"):
@@ -586,15 +593,15 @@ def show():
             else:
                 st.warning("⚠️ Please enter a move.")
                 speak_message_async("Please enter a move.")
-    
+
     with col2:
         if st.button("🔄 Clear Input"):
             st.rerun()
-    
+
     # === SIDEBAR ===
     with st.sidebar:
         st.header("🎮 Game Controls")
-            
+        
         # Game statistics
         st.markdown("""
         <div class='game-stats'>
@@ -609,7 +616,7 @@ def show():
         with col2:
             st.metric("Checks", st.session_state.game_stats["checks"])
             st.metric("Turn", len(board.move_stack) + 1)
-    
+
         st.markdown("---")
         
         # Auto-play toggle
@@ -643,7 +650,7 @@ def show():
             else:
                 st.warning("🚫 No moves to undo.")
                 speak_message_async("No moves to undo.")
-    
+
         if st.button("🔄 Reset Game"):
             board.reset()
             st.session_state.move_history = []
@@ -653,7 +660,7 @@ def show():
             st.info("🆕 Game reset.")
             speak_message_async("Game reset.")
             st.rerun()
-    
+
         # Move history
         if st.session_state.move_history:
             st.markdown("### 📜 Move History")
@@ -685,11 +692,11 @@ def show():
                         st.info("⚖️ Position is equal")
             except Exception as e:
                 st.warning("Unable to analyze position")
-    
+
         if st.button("🚪 Quit"):
             stockfish.quit()
             st.stop()
-    
+
         st.markdown("---")
         st.markdown("""
         <div class='developer-credit'>
@@ -698,8 +705,3 @@ def show():
             <small>Enhanced with AI assistance</small>
         </div>
         """, unsafe_allow_html=True)
-    
-    
-    
-    
-
