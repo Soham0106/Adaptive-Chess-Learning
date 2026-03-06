@@ -1,4 +1,4 @@
-def show():
+
     import asyncio
     import sys
     import os
@@ -703,4 +703,5 @@ def show():
             <em>Adaptive Chess Learning</em><br>
             <small>Enhanced with AI assistance</small>
         </div>
+
         """, unsafe_allow_html=True)
