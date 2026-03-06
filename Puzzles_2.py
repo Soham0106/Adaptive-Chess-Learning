@@ -362,7 +362,7 @@ def show():
                     y = margin + (7 - rank) * square_size
                 
                     color_prefix = 'w' if piece.color == chess.WHITE else 'b'
-                    piece_symbol = piece.symbol()
+                    piece_symbol = piece.symbol().lower()
                     piece_path = os.path.join(PIECE_FOLDER, f"{color_prefix}{piece_symbol}.png")
                 
                     try:
@@ -661,6 +661,7 @@ def show():
         🎯 Master tactical chess skills through 2-piece battles! Each puzzle challenges your strategic thinking.
     </div>
     """, unsafe_allow_html=True)
+
 
 
 
